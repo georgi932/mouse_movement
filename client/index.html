@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="stylesheet" href="index.css" />
+        <title>Mouse movement</title>
+
+        <script>
+            window.addEventListener("DOMContentLoaded", () => {
+                const websocket = new WebSocket("ws://localhost:8000/");
+
+                websocket.onopen = function (event) {
+                    console.log("WebSocket connection opened:", event);
+                };
+
+                websocket.onmessage = function (event) {
+                    console.log("WebSocket message received:", event);
+                };
+
+                websocket.onclose = function (event) {
+                    console.log("WebSocket connection closed:", event);
+                };
+
+                websocket.onerror = function (event) {
+                    console.error("WebSocket error:", event);
+                };
+
+                const element = document.getElementsByClassName("position")[0];
+
+                document.addEventListener("click", () => {
+                    websocket.send(element.textContent);
+                });
+
+                websocket.onmessage = ({ data }) => {
+                    const coordinates = data.substring(1, data.length - 1);
+                    const [x, y] = coordinates
+                        .split(",")
+                        .map((coord) => parseInt(coord.trim()));
+
+                    element.innerHTML = `x: ${x}, y: ${y}`;
+                };
+            });
+        </script>
+
+        <style>
+            html,
+            body {
+                height: 100%;
+                margin: 0;
+                padding: 0;
+            }
+
+            .container {
+                position: relative;
+                height: 100%;
+                display: flex;
+                justify-content: flex-start;
+                align-items: flex-end;
+            }
+
+            .wrapper {
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            p {
+                font-size: 20px;
+                margin: 0;
+            }
+        </style>
+    </head>
+
+    <body>
+        <div class="container">
+            <div class="wrapper">
+                <p class="position"></p>
+            </div>
+        </div>
+    </body>
+</html>
